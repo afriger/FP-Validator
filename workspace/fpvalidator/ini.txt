@@ -1,0 +1,8 @@
+path_family   = ./base-data/family.csv
+original_family = H:/Production/FlyProbe_Monitor/base_data/family.csv
+path_limits   = ./base-data/Primary_Limits_new.csv
+original_limits = H:/Production/FlyProbe_Monitor/base_data/Primary_Limits_new.csv
+type = RCWE-1206
+target = Laser_Trim
+tolerance = 5
+
