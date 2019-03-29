@@ -10,6 +10,7 @@
 #include <map>
 #include "Logger.h"
 #include "CSVReader.h"
+#include "INIFile.h"
 
 class Family: public CallbackInterface
 {
@@ -34,13 +35,22 @@ class Family: public CallbackInterface
 	};
 	public:
 	Family(const std::string& filename)
-			: m_reader(filename, ","),m_counter(0)
+			: m_reader(filename, ","), m_counter(0)
 	{
 		pLogger = Logger::getInstance();
 	}
 	virtual ~Family()
 	{
 	}
+	static void Verify( INIFile& ini)
+	{
+		std::string family_file = ini.getValue("path_family");
+		std::string family_original = ini.getValue("original_family");
+		ini.checkUpdate(family_file, family_original);
+		Family family(family_file);
+		family.getData();
+	}
+
 	virtual void cbiCallbackFunction(const std::vector<std::string>& vec, const std::string& str)
 	{
 
@@ -88,14 +98,16 @@ class Family: public CallbackInterface
 	size_t GetHash(const std::string& family_id, const std::string& prod_id, const std::string& dbc_default)
 	{
 		std::hash<std::string> hash;
-		std::string mapKey = /*family_id +*//* prod_id+ */ dbc_default; // + GetFamily();
+		std::string mapKey = family_id + dbc_default; //+*//* prod_id+ */ dbc_default;
 		return hash(mapKey);
 	}
+
 protected:
 	Logger* pLogger;
 	CSVReader m_reader;
 	std::map<size_t, std::vector<std::string>> m_map;
 	int m_counter;
 };
+
 
 #endif /* FAMILY_H_ */

@@ -11,7 +11,6 @@
 #include "PrimaryLimitsNew.h"
 #include "Family.h"
 
-//const char* file_csv = "./Primary_Limits_new.csv";
 Logger* pLogger = NULL;
 
 std::string GetCurrentWorkingDir(void)
@@ -22,57 +21,19 @@ std::string GetCurrentWorkingDir(void)
 	return current_working_dir;
 }
 
-DBLimits PrimaryLimits(INIFile inifile)
-{
-	DBLimits db;
-	std::string file_csv = inifile.getValue("path_limits");
-	std::string original = inifile.getValue("original_limits");
-	inifile.checkUpdate(file_csv, original);
-	Primary_Limits_new reader(file_csv);
-
-	std::vector<std::vector<std::string> > dataList = reader.getData();
-	// Print the content of row by row on screen
-	db.Counter(0);
-	for (std::vector<std::string> record : dataList)
-	{
-		CSVRecordPrimaryLimits rec(record);
-		db.Insert(rec);
-	}
-	//test trim data
-	std::string type = inifile.getValue("type");
-	std::string target = inifile.getValue("target");
-	std::string tolerance = inifile.getValue("tolerance");
-	size_t key = db.GetHash(type, target, tolerance);
-	std::vector<CSVRecordPrimaryLimits> res;
-	res = db.GetElements(key);
-	res.size();
-	std::cout << "KEYS COUNT: " << res.size() << std::endl;
-	for (CSVRecordPrimaryLimits& r : res)
-	{
-		TargetData data = r.GetTargetData(0.051);
-		std::cout << "data 0.051: [" << data.Value << "]" << data.Lo << ";" << data.Hi << ";" << data.Md;
-		std::cout << '\n';
-	}
-	return db;
-}
-
 int main()
 {
 
 	std::cout << "Wait .... " << std::endl;
 	pLogger = Logger::getInstance();
 	pLogger->Trace(true);
-	INIFile inifile("./ini.txt");
-	inifile.Ini();
+	INIFile ini("./ini.txt");
+	ini.Ini();
 
-//	DBLimits db = PrimaryLimits(inifile);
-//	std::cout << "PrimaryLimits number of doubles: " << db.Counter() << std::endl;
+	DBLimits db = Primary_Limits_new::Verify(ini);
+	Primary_Limits_new::GetTargetData(ini, db);
+	Family::Verify(ini);
 
-	std::string family_file = inifile.getValue("path_family");
-	std::string family_original = inifile.getValue("original_family");
-	inifile.checkUpdate(family_file,family_original);
-	Family family(family_file);
-	family.getData();
 	getchar();
 	return 0;
 }

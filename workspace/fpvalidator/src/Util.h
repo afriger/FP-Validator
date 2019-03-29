@@ -110,6 +110,10 @@ public:
 
 	static std::string time_to_string(const std::time_t& t)
 	{
+		if(t<=0)
+		{
+			return "XX-XX-XXXX ??:??:??";
+		}
 		struct tm * timeinfo;
 		char buffer[80];
 		timeinfo = localtime(&t);

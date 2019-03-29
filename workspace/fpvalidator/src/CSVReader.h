@@ -54,7 +54,9 @@ public:
 	{
 		pLogger = Logger::getInstance();
 	}
-	virtual ~CSVReader();
+	virtual ~CSVReader()
+	{
+	}
 	std::string fileName() const
 	{
 		return m_fileName;
@@ -64,36 +66,33 @@ public:
 	std::map<std::string, std::string> getPairs();
 	std::vector<std::vector<std::string> > getData(CallbackInterface* cb);
 	void getVector(CallbackInterface* cb);
-	std::time_t LastModificationTime(const char* file);
-	void checkUpdate(const std::string& current, const std::string& original);
+	std::time_t LastModificationTime(const char* file) const;
+	void checkUpdate(const std::string& current, const std::string& original) const;
 	protected:
 	std::string StripInvalidCharacters(std::string& str);
 	std::vector<std::string> split(std::string& inp, std::string delimeter, std::string& InvalidCharacters);
 	std::vector<std::string> split(std::string& inp, std::string delimeter);
 };
 
-CSVReader::~CSVReader()
-{
-	// TODO Auto-generated destructor stub
-}
-void CSVReader::checkUpdate(const std::string& current, const std::string& original)
-{
+void CSVReader::checkUpdate(const std::string& current, const std::string& original) const
+		{
 	std::time_t result = std::time(nullptr);
 	std::time_t org = LastModificationTime(original.c_str());
 	std::time_t cur = LastModificationTime(current.c_str());
-	//std::cout << "TIME:[" << result << "]" << org << "??" << cur << ";" << std::endl;
-	std::cout << "TIME:[" << Util::time_to_string(result) << "]" << Util::time_to_string(org) << "??" << Util::time_to_string(cur) << ";" << std::endl;
-
+	std::cout << "TIME:[" << Util::time_to_string(result) << "]" << Util::time_to_string(org) << "<>" << Util::time_to_string(cur) << ";" << std::endl;
+	std::stringstream ss;
+	ss << Util::time_to_string(result) << "," <<Util::time_to_string(org) <<"->"<<Util::time_to_string(cur) << ";" << std::endl;
+	pLogger->error("TIME", ss);
 	if (org > cur)
 	{
 		std::stringstream ss;
-		ss << ("File ") << current << "is not up to date.";
+		ss << ("File \"") << current << "\" is not up to date.";
 		pLogger->error("UPDATED", ss);
 	}
 
 }
-std::time_t CSVReader::LastModificationTime(const char* file)
-{
+std::time_t CSVReader::LastModificationTime(const char* file) const
+		{
 	struct stat buf;
 	if (!stat(file, &buf))
 	{
@@ -118,20 +117,21 @@ std::map<std::string, std::string> CSVReader::getPairs()
 		if (vec.size() == 2)
 		{
 			map.insert( { Util::trim_copy(vec.at(0)), Util::trim_copy(vec.at(1)) });
-			std::cout << Util::trim_copy(vec.at(0)) << "=" << Util::trim_copy(vec.at(1)) << std::endl;
+			//std::cout << Util::trim_copy(vec.at(0)) << "=" << Util::trim_copy(vec.at(1)) << std::endl;
 		}
 	}
 	if (file.bad())
 	{
-		std::cout << "IO error" << std::endl;
+		std::stringstream ss;
+		ss << "\"" << m_fileName << "\"" << " IO error";
+		pLogger->error("ERROR", ss);
 	} else if (!file.eof())
 	{
-		std::cout << "format error" << std::endl; // format error (not possible with getline but possible with operator>>)
+		std::stringstream ss;
+		ss << "\"" << m_fileName << "\"" << " format error.";
+		pLogger->error("ERROR", ss);
 	} else
 	{
-		// format error (not possible with getline but possible with operator>>)
-		// or end of file (can't make the difference)
-
 	}
 
 	// Close the File
@@ -167,7 +167,7 @@ void CSVReader::getVector(CallbackInterface* cb)
 	std::vector<std::vector<std::string> > dataList;
 	std::string line = "";
 	// Iterate through each line and split the content using delimeter
-	std::string InvalidCharacters;
+	std::string InvalidCharacters = "";
 	while (getline(file, line))
 	{
 		std::vector<std::string> vec;
@@ -215,7 +215,7 @@ std::vector<std::string> CSVReader::split(std::string& stringToBeSplitted, std::
 	{
 		std::string val = stringToBeSplitted.substr(startIndex, endIndex - startIndex);
 		InvalidCharacters += StripInvalidCharacters(val);
-
+		Util::trim(val);
 		splittedString.push_back(val);
 		startIndex = endIndex + delimeter.size();
 	}
@@ -223,6 +223,7 @@ std::vector<std::string> CSVReader::split(std::string& stringToBeSplitted, std::
 	{
 		std::string val = stringToBeSplitted.substr(startIndex);
 		InvalidCharacters += StripInvalidCharacters(val);
+		Util::trim(val);
 		splittedString.push_back(val);
 	}
 

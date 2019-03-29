@@ -11,11 +11,8 @@ const char* Laser_Trim = "Laser_Trim";
 
 class CSVRecordPrimaryLimits
 {
-protected:
-	std::vector<std::string> m_record;
-	std::vector<TargetData> m_data;
-	Logger* pLogger;
-	public:
+
+public:
 	enum Index
 	{
 		N = 0,
@@ -87,7 +84,10 @@ public:
 	}
 	TargetData GetTargetData(double Value);
 	void InitTargetData();
-
+	protected:
+	std::vector<std::string> m_record;
+	std::vector<TargetData> m_data;
+	Logger* pLogger;
 };
 
 void CSVRecordPrimaryLimits::InitTargetData()
@@ -104,12 +104,12 @@ void CSVRecordPrimaryLimits::InitTargetData()
 
 		std::string Val = m_record.at(k);
 		double dVal = Util::get_value(Val);
-		if (dVal!=-1 && val_prev >dVal )
+		if (dVal != -1 && val_prev > dVal)
 		{
 			if (pLogger)
 			{
 				std::stringstream ss;
-				ss <<GetType()<<","<<GetTarget()<<","<<GetTolerance()<<",["<<val_prev<<'<'<<dVal<<']';
+				ss << GetType() << "," << GetTarget() << "," << GetTolerance() << ",[" << val_prev << '<' << dVal << ']';
 				pLogger->error("LESS", ss);
 			}
 		}

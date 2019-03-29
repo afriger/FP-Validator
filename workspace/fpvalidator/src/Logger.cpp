@@ -10,7 +10,7 @@
 #pragma warning(disable : 4996)
 #endif
 
-#define bConsol 1
+#define bConsol 0
 
 Logger* Logger::m_Instance = 0;
 const std::string logFileName = "fpvalidator.log";
