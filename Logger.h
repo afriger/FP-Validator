@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <mutex>
 #include <sstream>
+#include <fstream>
 #if !__ECLIPSE_VI
 #pragma warning(disable : 4996)
 #endif
@@ -63,10 +64,14 @@ protected:
 	Logger();
 	~Logger();
 	std::string getCurrentTime();
+	std::string getFileName();
+	std::string currentTime(const char* format);
+	std::ifstream::pos_type fileSize(const char* filename);
+	std::string replaceFile();
 
 private:
 	bool m_bTrace;
-	void IntoFile(std::string& data);
+	void IntoFile(const std::string& data);
 	Logger(const Logger& obj)
 			: m_bTrace(obj.m_bTrace)
 	{

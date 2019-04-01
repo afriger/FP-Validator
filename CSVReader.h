@@ -79,18 +79,24 @@ void CSVReader::checkUpdate(const std::string& current, const std::string& origi
 	std::time_t result = std::time(nullptr);
 	std::time_t org = LastModificationTime(original.c_str());
 	std::time_t cur = LastModificationTime(current.c_str());
-	std::cout << "TIME:[" << Util::time_to_string(result) << "]" << Util::time_to_string(org) << "<>" << Util::time_to_string(cur) << ";" << std::endl;
-
-	if (org > cur)
+	//std::cout << "TIME:[" << Util::time_to_string(result) << "]" << Util::time_to_string(org) << "<>" << Util::time_to_string(cur) << ";" << std::endl;
 	{
 		std::stringstream ss;
-		ss << ("File \"") << current << "\" is not up to date.";
-		pLogger->error("UPDATED", ss);
+		ss << Util::time_to_string(result) << "," << Util::time_to_string(org) << "," << Util::time_to_string(cur) << std::endl;
+		pLogger->error("TIME", ss);
 	}
+	std::stringstream ss;
+	ss << ("File \"") << current<< "\" is ";
+	if (org > cur)
+	{
+		ss <<"Not ";
+	}
+	ss <<"Up to Date.";
+	pLogger->error("UPDATED", ss);
 
 }
 std::time_t CSVReader::LastModificationTime(const char* file) const
-{
+		{
 	struct stat buf;
 	if (!stat(file, &buf))
 	{

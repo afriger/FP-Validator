@@ -10,7 +10,8 @@
 #pragma warning(disable : 4996)
 #endif
 
-#define bConsol 1
+#define bConsol 0
+#define  MAX_SIZE 10000000
 
 Logger* Logger::m_Instance = 0;
 const std::string logFileName = "fpvalidator.log";
@@ -18,7 +19,17 @@ const std::string logFileName = "fpvalidator.log";
 Logger::Logger()
 {
 	m_bTrace = false;
+	std::string newName = replaceFile();
 	m_File.open(logFileName.c_str(), std::ios::out | std::ios::app);
+	if (newName.empty() || newName.length() < 3)
+	{
+		error("REPLACE", "Error renaming file");
+
+	} else
+	{
+		newName +=",file renamed successfully";
+		error("REPLACE",newName);
+	}
 }
 
 Logger::~Logger()
@@ -35,7 +46,30 @@ Logger* Logger::getInstance() throw ()
 	return m_Instance;
 }
 
-void Logger::IntoFile(std::string& data)
+std::string Logger::replaceFile()
+{
+
+	std::ifstream::pos_type size = fileSize(logFileName.c_str());
+	if (size < MAX_SIZE)
+	{
+		return "";
+	}
+	std::string newFileName = getFileName();
+	int result = rename(logFileName.c_str(), newFileName.c_str());
+	if (result != 0)
+	{
+		return "";
+	}
+
+	// clear data
+	std::ofstream ofs;
+	ofs.open("test.txt", std::ofstream::out | std::ofstream::trunc);
+	ofs.close();
+	return newFileName;
+
+}
+
+void Logger::IntoFile(const std::string& data)
 {
 #if !__ECLIPSE_VI
 	std::lock_guard<std::mutex> lock(m_mutex);
@@ -45,11 +79,26 @@ void Logger::IntoFile(std::string& data)
 		std::cout << getCurrentTime() << "," << data << std::endl;
 	} else
 	{
+		std::cout << getCurrentTime() << "," << data << std::endl;
 		m_File << getCurrentTime() << "," << data << std::endl;
 	}
 }
-
+std::string Logger::getFileName()
+{
+	return currentTime("%d-%m-%Y_%H%M%S.log");
+}
 std::string Logger::getCurrentTime()
+{
+	return currentTime("%d-%m-%Y %H:%M:%S");
+}
+
+std::ifstream::pos_type Logger::fileSize(const char* filename)
+{
+	std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
+	return in.tellg();
+}
+
+std::string Logger::currentTime(const char* format)
 {
 	time_t rawtime;
 	struct tm * timeinfo;
@@ -58,7 +107,7 @@ std::string Logger::getCurrentTime()
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 
-	strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", timeinfo);
+	strftime(buffer, sizeof(buffer), format, timeinfo);
 	std::string str(buffer);
 	return str;
 }
@@ -71,7 +120,6 @@ void Logger::error(const char* prompt, const char* text) throw ()
 	data.append(prompt);
 	data.append("],");
 	data.append(text);
-	//std::cout << data;
 	IntoFile(data);
 
 }
