@@ -1,0 +1,1 @@
+"C:\Program Files\internet explorer\iexplore.exe" C:\Sasha\__Vishay\__dev\fpvalidator\workspace\fpvalidator\warning.html
