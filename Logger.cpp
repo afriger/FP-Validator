@@ -15,20 +15,26 @@
 
 Logger* Logger::m_Instance = 0;
 const std::string logFileName = "fpvalidator.log";
+const char* LeaveOld = "1";
 
 Logger::Logger()
 {
 	m_bTrace = false;
 	std::string newName = replaceFile();
 	m_File.open(logFileName.c_str(), std::ios::out | std::ios::app);
-	if (newName.empty() || newName.length() < 3)
+	if (0 == newName.compare(LeaveOld))
+	{
+		return;
+	}
+	if (newName.empty())
 	{
 		error("REPLACE", "Error renaming file");
 
-	} else
+	}
+	else
 	{
-		newName +=",file renamed successfully";
-		error("REPLACE",newName);
+		newName += ",file renamed successfully";
+		error("REPLACE", newName);
 	}
 }
 
@@ -52,7 +58,7 @@ std::string Logger::replaceFile()
 	std::ifstream::pos_type size = fileSize(logFileName.c_str());
 	if (size < MAX_SIZE)
 	{
-		return "";
+		return LeaveOld;
 	}
 	std::string newFileName = getFileName();
 	int result = rename(logFileName.c_str(), newFileName.c_str());
@@ -61,7 +67,7 @@ std::string Logger::replaceFile()
 		return "";
 	}
 
-	// clear data
+// clear data
 	std::ofstream ofs;
 	ofs.open("test.txt", std::ofstream::out | std::ofstream::trunc);
 	ofs.close();

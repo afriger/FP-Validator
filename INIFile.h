@@ -33,7 +33,7 @@ public:
 		}
 		return "";
 	}
-	void checkUpdate(const std::string& current, const std::string& original) const
+	void checkUpdate(const std::string& current, const std::string& original)
 	{
 		m_reader.checkUpdate(current,original);
 	}

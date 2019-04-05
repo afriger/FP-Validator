@@ -1,17 +1,11 @@
 #include <stdio.h>
 #include <iostream>
 #include <direct.h>
-
-#include "CSVRecordPrimaryLimits.h"
-#include "DBLimits.h"
 #include "Logger.h"
-#include "Util.h"
-#include "TargetData.h"
-#include "INIFile.h"
-#include "PrimaryLimitsNew.h"
-#include "Family.h"
+#include "Validator.h"
 
 Logger* pLogger = NULL;
+const std::string file_ini = "./ini.txt";
 
 std::string GetCurrentWorkingDir(void)
 {
@@ -25,15 +19,18 @@ int main()
 {
 
 	std::cout << "Wait .... " << std::endl;
+
 	pLogger = Logger::getInstance();
 	pLogger->Trace(true);
-	INIFile ini("./ini.txt");
-	ini.Ini();
 
-	DBLimits db = Primary_Limits_new::Verify(ini);
-	Primary_Limits_new::GetTargetData(ini, db);
-	Family::Verify(ini);
+	Validator validator(file_ini);
+	validator.Validate();
+	std::vector<ResultMessage> fatal = pLogger->GetMessages(_eRate::FATAL);
+	std::vector<ResultMessage> warning = pLogger->GetMessages(_eRate::WARNING);
+	std::cout << "RESULT: " << "FATAL:" << fatal.size() << "; WARNING:" << warning.size() << std::endl;
 
+	//std::string cmd = validator.cmdPath();
+	//system(cmd.c_str());
 	getchar();
 	return 0;
 }

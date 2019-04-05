@@ -24,6 +24,7 @@
 #include "Logger.h"
 #include "CallbackInterface.h"
 #include "CSVRecordPrimaryLimits.h"
+#include "ResultMessage.h"
 
 //const char* fileOriginal = "H:/Production/FlyProbe_Monitor/base_data/Primary_Limits_new.csv";
 
@@ -48,6 +49,8 @@ class CSVReader
 	std::string m_delimeter;
 	Logger* pLogger;
 
+	void error_get_file(const std::ifstream& file);
+
 public:
 	CSVReader(const std::string& filename, const std::string& delm)
 			: m_fileName(filename), m_delimeter(delm)
@@ -66,46 +69,57 @@ public:
 	std::map<std::string, std::string> getPairs();
 	std::vector<std::vector<std::string> > getData(CallbackInterface* cb);
 	void getVector(CallbackInterface* cb);
-	std::time_t LastModificationTime(const char* file) const;
-	void checkUpdate(const std::string& current, const std::string& original) const;
+	void checkUpdate(const std::string& current, const std::string& original);
 	protected:
 	std::string StripInvalidCharacters(std::string& str);
 	std::vector<std::string> split(std::string& inp, std::string delimeter, std::string& InvalidCharacters);
 	std::vector<std::string> split(std::string& inp, std::string delimeter);
 };
 
-void CSVReader::checkUpdate(const std::string& current, const std::string& original) const
-		{
+void CSVReader::checkUpdate(const std::string& current, const std::string& original)
+{
 	std::time_t result = std::time(nullptr);
-	std::time_t org = LastModificationTime(original.c_str());
-	std::time_t cur = LastModificationTime(current.c_str());
+	std::time_t org = Util::LastModificationTime(original.c_str());
+	std::time_t cur = Util::LastModificationTime(current.c_str());
 	//std::cout << "TIME:[" << Util::time_to_string(result) << "]" << Util::time_to_string(org) << "<>" << Util::time_to_string(cur) << ";" << std::endl;
 	{
 		std::stringstream ss;
 		ss << Util::time_to_string(result) << "," << Util::time_to_string(org) << "," << Util::time_to_string(cur) << std::endl;
 		pLogger->error("TIME", ss);
 	}
+
 	std::stringstream ss;
-	ss << ("File \"") << current<< "\" is ";
+	ss << ("File \"") << current << "\" is ";
 	if (org > cur)
 	{
-		ss <<"Not ";
+		ss << "Not ";
+
 	}
-	ss <<"Up to Date.";
+	ss << "Up to Date.";
 	pLogger->error("UPDATED", ss);
+	pLogger->AddMessage(_eRate::WARNING, ss.str());
 
 }
-std::time_t CSVReader::LastModificationTime(const char* file) const
-		{
-	struct stat buf;
-	if (!stat(file, &buf))
+
+
+void CSVReader::error_get_file(const std::ifstream& file)
+{
+	if (file.bad())
 	{
-		return buf.st_mtime;
+		std::stringstream ss;
+		ss << "\"" << m_fileName << "\"" << " IO error";
+		pLogger->error("ERROR", ss);
+		pLogger->AddMessage(_eRate::FATAL, ss.str());
+	} else
+	if (!file.eof())
+	{
+		std::stringstream ss;
+		ss << "\"" << m_fileName << "\"" << " format error.";
+		pLogger->error("ERROR", ss);
+		pLogger->AddMessage(_eRate::FATAL, ss.str());
+	} else
+	{
 	}
-	std::stringstream ss;
-	ss << ("Can't get (atime) ") << file;
-	pLogger->error("ERROR", ss);
-	return -1;
 }
 
 std::map<std::string, std::string> CSVReader::getPairs()
@@ -124,19 +138,7 @@ std::map<std::string, std::string> CSVReader::getPairs()
 			//std::cout << Util::trim_copy(vec.at(0)) << "=" << Util::trim_copy(vec.at(1)) << std::endl;
 		}
 	}
-	if (file.bad())
-	{
-		std::stringstream ss;
-		ss << "\"" << m_fileName << "\"" << " IO error";
-		pLogger->error("ERROR", ss);
-	} else if (!file.eof())
-	{
-		std::stringstream ss;
-		ss << "\"" << m_fileName << "\"" << " format error.";
-		pLogger->error("ERROR", ss);
-	} else
-	{
-	}
+	error_get_file(file);
 
 	// Close the File
 	file.close();
@@ -161,6 +163,7 @@ std::vector<std::vector<std::string> > CSVReader::getData(CallbackInterface* cb)
 		dataList.push_back(vec);
 
 	}
+	error_get_file(file);
 	// Close the File
 	file.close();
 	return dataList;
@@ -181,6 +184,7 @@ void CSVReader::getVector(CallbackInterface* cb)
 			cb->cbiCallbackFunction(vec, InvalidCharacters);
 		}
 	}
+	error_get_file(file);
 	// Close the File
 	file.close();
 	return;

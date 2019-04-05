@@ -11,6 +11,7 @@
 #include "Logger.h"
 #include "CSVReader.h"
 #include "INIFile.h"
+#include "ResultMessage.h"
 
 class Family: public CallbackInterface
 {
@@ -42,9 +43,10 @@ class Family: public CallbackInterface
 	virtual ~Family()
 	{
 	}
-	static void Verify( INIFile& ini)
+	static void Verify(INIFile& ini)
 	{
-		std::string family_file = ini.getValue("path_family");
+		std::string base_data_path = ini.getValue("base_data_path");
+		std::string family_file = base_data_path + "/" + ini.getValue("path_family");
 		std::string family_original = ini.getValue("original_family");
 		ini.checkUpdate(family_file, family_original);
 		Family family(family_file);
@@ -108,6 +110,5 @@ protected:
 	std::map<size_t, std::vector<std::string>> m_map;
 	int m_counter;
 };
-
 
 #endif /* FAMILY_H_ */

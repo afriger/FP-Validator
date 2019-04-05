@@ -4,14 +4,30 @@
 #include <cctype>
 #include <locale>
 #include <string>
+#include <vector>
 #include <sstream>
 
 #include <sys/stat.h>
 #include <time.h>
 #include <ctime>
+
 class Util
 {
 public:
+	static std::time_t LastModificationTime(const char* file)
+	{
+		struct stat buf;
+		if (!stat(file, &buf))
+		{
+			return buf.st_mtime;
+		}
+/*		std::stringstream ss;
+		ss << ("Can't get (atime) ") << file;
+		pLogger->error("ERROR", ss);
+		*/
+		return -1;
+	}
+
 	// trim from start (in place)
 	static inline void ltrim(std::string &s)
 	{
@@ -110,7 +126,7 @@ public:
 
 	static std::string time_to_string(const std::time_t& t)
 	{
-		if(t<=0)
+		if (t <= 0)
 		{
 			return "XX-XX-XXXX ??:??:??";
 		}
@@ -121,6 +137,21 @@ public:
 		std::string str(buffer);
 		return str;
 	}
+	static std::vector<std::string> str_split(std::string& s, const std::string& delimiter)
+	{
+		std::vector<std::string> vec;
+		size_t pos = 0;
+		std::string token;
+		while ((pos = s.find(delimiter)) != std::string::npos)
+		{
+			token = s.substr(0, pos);
+			//std::cout << token << std::endl;
+			vec.push_back(token);
+			s.erase(0, pos + delimiter.length());
+		}
+		return vec;
+	}
+
 };
 #endif//__UTIL_H_15032019
 

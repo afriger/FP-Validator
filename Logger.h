@@ -17,8 +17,8 @@
 
 // Direct Interface for logging into log file or console using MACRO(s)
 #define LOG_ERROR(x)	Logger::getInstance()->error(x)
-
-class Logger
+#include "ResultMessage.h"
+class Logger:public Messages
 {
 public:
 	static Logger* getInstance() throw ();
