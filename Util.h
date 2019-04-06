@@ -21,10 +21,7 @@ public:
 		{
 			return buf.st_mtime;
 		}
-/*		std::stringstream ss;
-		ss << ("Can't get (atime) ") << file;
-		pLogger->error("ERROR", ss);
-		*/
+
 		return -1;
 	}
 

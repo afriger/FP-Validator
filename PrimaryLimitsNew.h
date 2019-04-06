@@ -54,9 +54,12 @@ DBLimits Primary_Limits_new::Verify(INIFile& ini)
 {
 	DBLimits db;
 	std::string base_data_path = ini.getValue("base_data_path");
-	std::string file_csv = base_data_path +"/"+ini.getValue("path_limits");
+	std::string file_csv = base_data_path + "/" + ini.getValue("path_limits");
 	std::string original = ini.getValue("original_limits");
-	ini.checkUpdate(file_csv, original);
+	if (-1 == ini.checkUpdate(file_csv, original))
+	{
+		return db;
+	}
 	Primary_Limits_new reader(file_csv);
 	std::vector<std::vector<std::string> > dataList = reader.getData();
 	db.Counter(0);

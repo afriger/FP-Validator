@@ -48,7 +48,10 @@ class Family: public CallbackInterface
 		std::string base_data_path = ini.getValue("base_data_path");
 		std::string family_file = base_data_path + "/" + ini.getValue("path_family");
 		std::string family_original = ini.getValue("original_family");
-		ini.checkUpdate(family_file, family_original);
+		if(-1 == ini.checkUpdate(family_file, family_original))
+		{
+			return;
+		}
 		Family family(family_file);
 		family.getData();
 	}

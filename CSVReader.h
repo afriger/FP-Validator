@@ -28,6 +28,7 @@
 
 //const char* fileOriginal = "H:/Production/FlyProbe_Monitor/base_data/Primary_Limits_new.csv";
 
+const char REM = ';';
 std::string gInvalidChar;
 bool static invalidChar(char c)
 {
@@ -69,14 +70,14 @@ public:
 	std::map<std::string, std::string> getPairs();
 	std::vector<std::vector<std::string> > getData(CallbackInterface* cb);
 	void getVector(CallbackInterface* cb);
-	void checkUpdate(const std::string& current, const std::string& original);
+	std::time_t checkUpdate(const std::string& current, const std::string& original);
 	protected:
 	std::string StripInvalidCharacters(std::string& str);
 	std::vector<std::string> split(std::string& inp, std::string delimeter, std::string& InvalidCharacters);
 	std::vector<std::string> split(std::string& inp, std::string delimeter);
 };
 
-void CSVReader::checkUpdate(const std::string& current, const std::string& original)
+std::time_t CSVReader::checkUpdate(const std::string& current, const std::string& original)
 {
 	std::time_t result = std::time(nullptr);
 	std::time_t org = Util::LastModificationTime(original.c_str());
@@ -90,17 +91,23 @@ void CSVReader::checkUpdate(const std::string& current, const std::string& origi
 
 	std::stringstream ss;
 	ss << ("File \"") << current << "\" is ";
-	if (org > cur)
+	if (org == -1)
+	{
+		ss << "In an Unknown Status";
+	}
+	else if (org > cur)
 	{
 		ss << "Not ";
 
 	}
-	ss << "Up to Date.";
+	else
+	{
+		ss << "Up to Date.";
+	}
 	pLogger->error("UPDATED", ss);
 	pLogger->AddMessage(_eRate::WARNING, ss.str());
-
+	return cur;
 }
-
 
 void CSVReader::error_get_file(const std::ifstream& file)
 {
@@ -114,7 +121,7 @@ void CSVReader::error_get_file(const std::ifstream& file)
 	if (!file.eof())
 	{
 		std::stringstream ss;
-		ss << "\"" << m_fileName << "\"" << " format error.";
+		ss << "No file \"" << m_fileName << "\""; // << " format error.";
 		pLogger->error("ERROR", ss);
 		pLogger->AddMessage(_eRate::FATAL, ss.str());
 	} else
@@ -130,6 +137,10 @@ std::map<std::string, std::string> CSVReader::getPairs()
 	// Iterate through each line and split the content using delimeter
 	while (getline(file, line))
 	{
+		if (0 == line.find_first_of(REM))
+		{
+			continue;
+		}
 		std::vector<std::string> vec;
 		vec = split(line, m_delimeter);
 		if (vec.size() == 2)

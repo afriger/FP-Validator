@@ -33,9 +33,9 @@ public:
 		}
 		return "";
 	}
-	void checkUpdate(const std::string& current, const std::string& original)
+	std::time_t checkUpdate(const std::string& current, const std::string& original)
 	{
-		m_reader.checkUpdate(current,original);
+		return m_reader.checkUpdate(current,original);
 	}
 protected:
 	CSVReader m_reader;

@@ -42,6 +42,7 @@ protected:
 
 void Validator::Validate()
 {
+	CheckPresenceFiles();
 	DBLimits db = Primary_Limits_new::Verify(m_ini);
 	Primary_Limits_new::GetTargetData(m_ini, db);
 	Family::Verify(m_ini);
@@ -54,13 +55,14 @@ void Validator::CheckPresenceFiles()
 	std::string base_data_path = m_ini.getValue("base_data_path");
 	std::string fileNames = m_ini.getValue("presence_files");
 	std::vector<std::string> vec = Util::str_split(fileNames, ",");
-	std::cout << "EXIST " << vec.size() << std::endl;
+	//std::cout << "EXIST " << vec.size() << std::endl;
 	for (std::string name : vec)
 	{
 		std::string file = base_data_path + "/" + name;
 		if (-1 == Util::LastModificationTime(file.c_str()))
 		{
 			pLogger->error("ABSENT", file);
+			pLogger->AddMessage(_eRate::FATAL,"No file \""+file+"\"");
 		}
 	}
 
