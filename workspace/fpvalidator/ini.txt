@@ -3,7 +3,8 @@ original_limits = H:/Production/FlyProbe_Monitor/base_data/Primary_Limits_new.cs
 base_data_path = ./base-data
 path_family   = family1.csv
 path_limits   = Primary_Limits_new.csv
-presence_files = Oven.csv,proper.csv,proper_ThinFilm.csv,proper_XYZAB.csv,Rank.csv,Special_type.csv,TC_type.csv,tolerance.csv
+presence_files = family1.csv,Primary_Limits_new.csv,proper.csv,proper_ThinFilm.csv,proper_XYZAB.csv,Rank.csv,Special_type.csv,tolerance.csv
+;Oven.csv,,TC_type.csv
 path_cmd = notice.cmd
 type = RCWE-1206
 target = Laser_Trim
